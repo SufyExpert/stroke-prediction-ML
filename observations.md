@@ -2,47 +2,48 @@
 
 ## What I observed
 
-I ran the benchmark with the stroke dataset and compared the model outputs directly. The most important thing I noticed is that the overall accuracy looks strong for almost every model, but that is misleading because the dataset is imbalanced. Many models are predicting the majority class most of the time and therefore look good on accuracy without actually detecting the stroke cases properly.
+I ran the benchmark on the stroke dataset and compared the outputs across the models. The most important observation is that accuracy looks high for most models, but it is not a reliable indicator in this problem because the dataset is imbalanced. A model can achieve around 95% accuracy while still failing to identify the actual stroke cases. That means the benchmark must be judged mainly by recall, precision, and class-level behavior, not only by overall accuracy.
 
-The precision and recall for the positive class were very weak in most runs. In a lot of models, the recall for the stroke class was effectively zero, which means the model was not identifying the actual positive cases in a useful way. This is the main issue I would focus on if I were improving the project further.
+The strongest evidence from the results is that the positive class was very weakly detected. In the test results, many models had precision of 0.0, recall of 0.0, or F1 close to 0.0. This shows that the models were mostly predicting the majority class and not learning the stroke pattern effectively.
 
-## My basic findings
+## Basic findings from the results
 
-- **Accuracy is not the right metric alone.** The dataset is imbalanced, so a model can look good on accuracy while missing the stroke cases almost entirely.
-- **Positive-class recall is the real weakness.** The models are not capturing real stroke cases well enough at the default threshold.
-- **Tree-based models overfit.** The deep decision tree and random forest perform nearly perfectly on training data but lose a lot of performance on validation and test data.
-- **Logistic Regression is the most stable baseline.** It had a relatively better ROC-AUC than several other models and gave a cleaner behaviour compared with the more complex classifiers.
+I observed the following points from the actual test results:
 
-## Strong reasons behind this
+- Logistic Regression reached an accuracy of 0.952, but its recall was only 0.02 and F1 was 0.039. Its precision was 1.0, which means it was very conservative and only predicted the positive class in a very small number of cases.
+- Gradient Boosting reached 0.950 accuracy, but recall stayed at 0.02 and F1 at 0.038. This indicates that the model ranked the classes somewhat well, but the decision threshold still caused poor positive detection.
+- KNN models delivered accuracy around 0.946–0.951, but their recall and F1 were 0.0 in test performance. This suggests poor separation of the minority class.
+- Random Forest and XGBoost also remained weak on the stroke class, with accuracy near 0.945 but precision and recall close to 0.0.
+- The deep Decision Tree had a test accuracy of 0.907, but its precision, recall, and F1 were still low. This is a sign of overfitting and weak generalization for the minority class.
 
-The reason this happens is not random. The dataset has a clear class imbalance, and many models are trained with the default threshold of 0.5. If the model is conservative and rarely predicts the positive class, its accuracy can still be high because the negative class dominates the dataset. This is why I looked beyond raw accuracy and paid attention to recall, precision, F1, and ROC-AUC.
+## Strong reasoning behind these results
 
-The deep tree and random forest also show clear overfitting. They memorize the training data almost perfectly, but their validation and test results are noticeably worse. This is a classic sign that the model has too much variance for the data size and class structure in this problem.
+The main reason is class imbalance. The positive class is much smaller than the negative class, so a model can gain high accuracy simply by predicting the non-stroke class most of the time. In this dataset, that problem is serious because the score is not only looking at a global accuracy value, but at whether the model can actually catch the patients with stroke.
 
-Another important point is that the positive class is relatively uncommon, so small changes in threshold or class handling can have a big impact on the final observations. If I were improving this further, my first step would be to use class weights or threshold tuning instead of relying only on default prediction probabilities.
+The second reason is the default decision threshold. Most models were evaluated using a 0.5 cutoff. If the predicted probabilities for stroke cases are low, the model will not classify them as positive even when its ranking ability is not terrible. This is why ROC-AUC can look moderately acceptable while recall remains poor.
 
-## Which models stood out for me
+The third reason is overfitting. The deep Decision Tree showed high training performance and then weaker validation/test performance. This tells me the model learned the training data too specifically and could not generalize well. The same pattern is visible in other tree-based models, where the training patterns look stronger than the actual test behavior.
 
-- **Logistic Regression** looked like the most reasonable baseline and had the strongest overall behavior among the simpler models.
-- **Gradient Boosting** and **XGBoost** had stronger ranking ability in the probability space, but they still had difficulty when the decision threshold was kept at the default value.
-- **KNN** did not perform well for the positive class and was not robust enough for this dataset.
-- **SVM** was not particularly effective under the default setup and was sensitive to the scaling decisions.
-- **The deep tree** was the clearest example of overfitting in this experiment.
+## Model-specific observations
 
-## What I would do next
+### Logistic Regression
+I found Logistic Regression to be the most stable baseline. Its ROC-AUC was around 0.843, which is stronger than several other models. However, the recall remained too low for real use. This tells me that the model has some ability to separate classes overall, but it still needs threshold tuning or class balancing to make it useful for stroke detection.
 
-If I were continuing this project, I would do the following in order:
+### KNN
+KNN did not perform well for the positive class. With both k=5 and k=25, the recall stayed at 0.0 on the test set. This suggests that the distance-based method was dominated by the majority class and could not identify stroke cases reliably in this setting.
 
-1. Use class weighting or a higher positive-class penalty to make the models care more about missing stroke cases.
-2. Tune the decision threshold instead of leaving it at 0.5.
-3. Compare precision-recall curve results instead of relying only on accuracy.
-4. Regularize tree-based models more aggressively to reduce overfitting.
-5. Re-run the benchmark with these changes and report recall and precision for the minority class as the main decision metrics.
+### Tree-based models
+The deep Decision Tree and Random Forest showed the clearest signs of overfitting. Their training results were stronger than their test results, which tells me that they were memorizing patterns rather than learning a robust decision boundary. The shallow Decision Tree also underfit, which is a useful contrast: it was too simple to capture the pattern properly.
 
-This is the part I would focus on because in a real medical classification task, catching real stroke patients matters more than showing a high overall accuracy based mostly on the majority class.
+### Gradient Boosting and XGBoost
+These models had better probability ranking than some of the simpler alternatives, but they still did not convert that into useful positive detection at the default threshold. This suggests that the class imbalance remains the central challenge, and more targeted handling is needed before these models can become truly useful.
+
+## What I would conclude
+
+From the results, I conclude that the benchmark worked as intended, but the dataset structure makes the task difficult. The models are not completely failing because they are badly built; they are failing because the positive class is too small and the evaluation is too dependent on accuracy. For this type of medical classification task, the important question is not whether the overall accuracy is high, but whether the model can detect the actual stroke patients.
+
+If this project were improved further, I would focus on class weighting, threshold tuning, and stronger handling of imbalance before making final conclusions about model quality. Without that, many models will look good in summary but still fail in the most important part of the task.
 
 ## Final takeaway
 
-My overall conclusion from the run is that the benchmark is working as intended, but the main problem is not model choice alone — it is the class imbalance and the default classification threshold. The models are not failing because they are badly coded; they are failing because the positive class is too small and the evaluation needs to reflect that specific problem more directly.
-
-For this assignment, I would treat the class imbalance issue as the main takeaway and the biggest improvement area, rather than focusing only on whether accuracy is high.
+My main conclusion is that the project is successful in showing the benchmark process, but the real challenge is not just model selection. The main issue is imbalance and decision thresholding. The results show that the dataset is harder than it appears from accuracy alone, and the benchmark demonstrates that the chosen models do not reliably detect the stroke-positive class under the current setup.
