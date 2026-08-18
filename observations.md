@@ -24,56 +24,58 @@ The second reason is the default decision threshold. Most models were evaluated 
 
 The third reason is overfitting. The deep Decision Tree showed high training performance and then weaker validation/test performance. This tells me the model learned the training data too specifically and could not generalize well. The same pattern is visible in other tree-based models, where the training patterns look stronger than the actual test behavior.
 
-## 1. Which model performed best on training data?
+## Questions we covered:
 
-I observed that the best-performing models on the training set were the deep Decision Tree and Random Forest. Both reached near-perfect training scores, with accuracy, precision, recall, F1, and ROC-AUC all close to 1.0. This means they fit the training data almost perfectly.
+### 1. Which model performed best on training data?
 
-However, this level of training performance is also a warning sign. It indicates that these models learned the training patterns too specifically and are likely overfitting. In other words, they memorized the data rather than learning a boundary that would generalize well.
+- I observed that the best-performing models on the training set were the deep Decision Tree and Random Forest. Both reached near-perfect training scores, with accuracy, precision, recall, F1, and ROC-AUC all close to 1.0. This means they fit the training data almost perfectly.
 
-## 2. Which model performed best on validation data?
+- However, this level of training performance is also a warning sign. It indicates that these models learned the training patterns too specifically and are likely overfitting. In other words, they memorized the data rather than learning a boundary that would generalize well.
 
-On the validation set, Logistic Regression was the strongest performer. Its validation ROC-AUC was around 0.841, and its validation accuracy stayed close to 0.951. This makes it the most stable model during validation.
+### 2. Which model performed best on validation data?
 
-Compared with the other models, Logistic Regression showed better balance between class separation and generalization. The more complex models either overfit the training data or failed to identify the minority class in a useful way.
+- On the validation set, Logistic Regression was the strongest performer. Its validation ROC-AUC was around 0.841, and its validation accuracy stayed close to 0.951. This makes it the most stable model during validation.
 
-## 3. Which model generalized best to the final test set?
+- Compared with the other models, Logistic Regression showed better balance between class separation and generalization. The more complex models either overfit the training data or failed to identify the minority class in a useful way.
 
-I concluded that Logistic Regression generalized best to the final test set. It had the highest test ROC-AUC, approximately 0.843, and maintained a strong accuracy level around 0.952. This was the most reliable result among the models I tested.
+### 3. Which model generalized best to the final test set?
 
-Even so, the final test results still showed a clear limitation. Many models had recall values near 0.0 and precision values of 0.0 or very low. This means that although overall accuracy looked strong, the models were still not detecting the stroke cases effectively enough.
+- I concluded that Logistic Regression generalized best to the final test set. It had the highest test ROC-AUC, approximately 0.843, and maintained a strong accuracy level around 0.952. This was the most reliable result among the models I tested.
 
-## 4. Which algorithm was most interpretable?
+- Even so, the final test results still showed a clear limitation. Many models had recall values near 0.0 and precision values of 0.0 or very low. This means that although overall accuracy looked strong, the models were still not detecting the stroke cases effectively enough.
 
-The most interpretable algorithm was the Decision Tree. It is easy to explain because its predictions are made through a sequence of simple if-then rules. A shallow Decision Tree is especially interpretable because it is shorter and easier for a person to follow.
+### 4. Which algorithm was most interpretable?
 
-Between the shallow and deep tree versions, the shallow tree was clearly more interpretable. The deep tree may fit the training data better, but it becomes harder to understand and explain.
+- The most interpretable algorithm was the Decision Tree. It is easy to explain because its predictions are made through a sequence of simple if-then rules. A shallow Decision Tree is especially interpretable because it is shorter and easier for a person to follow.
 
-## 5. Which algorithm was fastest at inference time?
+- Between the shallow and deep tree versions, the shallow tree was clearly more interpretable. The deep tree may fit the training data better, but it becomes harder to understand and explain.
 
-The fastest model at inference time was the deep Decision Tree, followed closely by Logistic Regression. In the final output, the deep Decision Tree had the lowest inference time on the test set.
+### 5. Which algorithm was fastest at inference time?
 
-This difference is small, so I would not treat speed as the main deciding factor. Predictive quality and class detection are more important than small timing differences in this benchmark.
+- The fastest model at inference time was the deep Decision Tree, followed closely by Logistic Regression. In the final output, the deep Decision Tree had the lowest inference time on the test set.
 
-## 6. Which model would you choose if explainability were a requirement?
+- This difference is small, so I would not treat speed as the main deciding factor. Predictive quality and class detection are more important than small timing differences in this benchmark.
 
-If explainability were the main requirement, I would choose the Decision Tree. It is the easiest model to explain because the decision process is transparent and can be followed directly.
+### 6. Which model would you choose if explainability were a requirement?
 
-However, the trade-off is clear. The shallow tree was easy to explain, but it was also too simple to capture the pattern properly. So the more interpretable model is not always the best predictive model.
+- If explainability were the main requirement, I would choose the Decision Tree. It is the easiest model to explain because the decision process is transparent and can be followed directly.
 
-## 7. Which model would you choose if predictive performance were the primary objective?
+- However, the trade-off is clear. The shallow tree was easy to explain, but it was also too simple to capture the pattern properly. So the more interpretable model is not always the best predictive model.
 
-If predictive performance were the main objective, I would choose Logistic Regression as the best overall model in this benchmark. It showed the strongest and most stable generalization behavior on the validation and test sets, with the highest ROC-AUC values among the models.
+### 7. Which model would you choose if predictive performance were the primary objective?
 
-At the same time, I would still be cautious because its recall for the positive class remained low. This means it is not yet a strong stroke-detection model in a real-world clinical context without further tuning and imbalance handling.
+- If predictive performance were the main objective, I would choose Logistic Regression as the best overall model in this benchmark. It showed the strongest and most stable generalization behavior on the validation and test sets, with the highest ROC-AUC values among the models.
 
-## 8. Did any model show signs of high bias or high variance?
+- At the same time, I would still be cautious because its recall for the positive class remained low. This means it is not yet a strong stroke-detection model in a real-world clinical context without further tuning and imbalance handling.
 
-Yes. I observed both patterns clearly:
+### 8. Did any model show signs of high bias or high variance?
 
-- **High bias:** The shallow Decision Tree and larger KNN models showed signs of underfitting. They were too simple and unable to capture enough of the underlying structure.
-- **High variance:** The deep Decision Tree and Random Forest showed clear signs of overfitting. They reached near-perfect training scores but performed worse on validation and test data.
+- Yes. I observed both patterns clearly:
 
-This contrast is useful because it shows that the issue is not only the choice of algorithm. The dataset is difficult, the class distribution is uneven, and the models struggle to learn the stroke-positive class consistently.
+   - **High bias:** The shallow Decision Tree and larger KNN models showed signs of underfitting. They were too simple and unable to capture enough of the underlying structure.
+   - **High variance:** The deep Decision Tree and Random Forest showed clear signs of overfitting. They reached near-perfect training scores but performed worse on validation and test data.
+
+- This contrast is useful because it shows that the issue is not only the choice of algorithm. The dataset is difficult, the class distribution is uneven, and the models struggle to learn the stroke-positive class consistently.
 
 ## What I would conclude
 
